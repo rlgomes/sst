@@ -175,6 +175,20 @@ def start(browser_type=None, browser_version='',
             # profile features are FF only
             profile = getattr(webdriver, '%sProfile' % browser_type)()
             profile.set_preference('intl.accept_languages', 'en')
+
+            # temporary fix for Selenium Issue: http://code.google.com/p/selenium/issues/detail?id=2863
+            profile.set_preference("capability.policy.default.HTMLDocument.readyState","allAccess")
+            profile.set_preference("capability.policy.default.HTMLDocument.compatMode","allAccess")
+            profile.set_preference("capability.policy.default.Document.compatMode","allAccess")
+            profile.set_preference("capability.policy.default.Location.href","allAccess")
+            profile.set_preference("capability.policy.default.Window.pageXOffset","allAccess")
+            profile.set_preference("capability.policy.default.Window.pageYOffset","allAccess")
+            profile.set_preference("capability.policy.default.Window.frameElement","allAccess")
+            profile.set_preference("capability.policy.default.Window.frameElement.get","allAccess")
+            profile.set_preference("capability.policy.default.Window.QueryInterface","allAccess")
+            profile.set_preference("capability.policy.default.Window.mozInnerScreenY","allAccess")
+            profile.set_preference("capability.policy.default.Window.mozInnerScreenX","allAccess")
+
             if config.browsermob_enabled:
                 # proxy integration is currently FF only
                 browsermob_proxy = bmobproxy.BrowserMobProxy(
