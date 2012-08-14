@@ -155,7 +155,7 @@ def _print(text):
 def start(browser_type=None, browser_version='',
           browser_platform='ANY', session_name='',
           javascript_disabled=False, assume_trusted_cert_issuer=False,
-          webdriver_remote=None):
+          webdriver_remote=None, preferences = []):
     """
     Starts Browser with a new session. Called for you at
     the start of each test script."""
@@ -176,18 +176,8 @@ def start(browser_type=None, browser_version='',
             profile = getattr(webdriver, '%sProfile' % browser_type)()
             profile.set_preference('intl.accept_languages', 'en')
 
-            # temporary fix for Selenium Issue: http://code.google.com/p/selenium/issues/detail?id=2863
-            profile.set_preference("capability.policy.default.HTMLDocument.readyState","allAccess")
-            profile.set_preference("capability.policy.default.HTMLDocument.compatMode","allAccess")
-            profile.set_preference("capability.policy.default.Document.compatMode","allAccess")
-            profile.set_preference("capability.policy.default.Location.href","allAccess")
-            profile.set_preference("capability.policy.default.Window.pageXOffset","allAccess")
-            profile.set_preference("capability.policy.default.Window.pageYOffset","allAccess")
-            profile.set_preference("capability.policy.default.Window.frameElement","allAccess")
-            profile.set_preference("capability.policy.default.Window.frameElement.get","allAccess")
-            profile.set_preference("capability.policy.default.Window.QueryInterface","allAccess")
-            profile.set_preference("capability.policy.default.Window.mozInnerScreenY","allAccess")
-            profile.set_preference("capability.policy.default.Window.mozInnerScreenX","allAccess")
+            for (preference,value) in preferences:
+                profile.set_preference(preference, value)
 
             if config.browsermob_enabled:
                 # proxy integration is currently FF only
