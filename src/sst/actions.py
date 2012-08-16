@@ -54,6 +54,7 @@ from selenium.common.exceptions import (
     NoSuchElementException, NoSuchAttributeException,
     InvalidElementStateException, WebDriverException,
     NoSuchWindowException, NoSuchFrameException)
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 from sst import config
 from sst import bmobproxy
@@ -170,14 +171,25 @@ def start(browser_type=None, browser_version='',
 
     _print('Starting %s' % browser_type)
 
+    def update_preferences(profile, preferences):
+        profile.set_preference('intl.accept_languages', 'en')
+
+        for (preference,value) in preferences:
+            profile.set_preference(preference, value)
+
+        if assume_trusted_cert_issuer:
+            profile.set_preference(
+                'webdriver_assume_untrusted_issuer', False)
+        if javascript_disabled:
+            profile.set_preference('javascript.enabled', False)
+
+        profile.update_preferences()
+
     if webdriver_remote is None:
         if browser_type == 'Firefox':
             # profile features are FF only
             profile = getattr(webdriver, '%sProfile' % browser_type)()
-            profile.set_preference('intl.accept_languages', 'en')
-
-            for (preference,value) in preferences:
-                profile.set_preference(preference, value)
+            update_preferences(profile, preferences)
 
             if config.browsermob_enabled:
                 # proxy integration is currently FF only
@@ -186,23 +198,23 @@ def start(browser_type=None, browser_version='',
                 selenium_proxy = webdriver.Proxy(
                     {'httpProxy': browsermob_proxy.url})
                 profile.set_proxy(selenium_proxy)
-            if assume_trusted_cert_issuer:
-                profile.set_preference(
-                    'webdriver_assume_untrusted_issuer', False)
-            if javascript_disabled:
-                profile.set_preference('javascript.enabled', False)
+
             browser = getattr(webdriver, browser_type)(profile)
         else:
             browser = getattr(webdriver, browser_type)()
     else:
+        profile = webdriver.FirefoxProfile()
+        update_preferences(profile, preferences)
+
         desired_capabilities = {"browserName": browser_type.lower(),
                                 "platform": browser_platform.upper(),
                                 "version": browser_version,
                                 "javascriptEnabled": not javascript_disabled,
-                                "name": session_name}
-        browser = webdriver.Remote(desired_capabilities=desired_capabilities,
-                                   command_executor=webdriver_remote)
+                                "name": session_name }
 
+        browser = webdriver.Remote(desired_capabilities=desired_capabilities,
+                                   command_executor=webdriver_remote, 
+                                   browser_profile = profile)
 
 def stop():
     """
