@@ -156,7 +156,9 @@ def _print(text):
 def start(browser_type=None, browser_version='',
           browser_platform='ANY', session_name='',
           javascript_disabled=False, assume_trusted_cert_issuer=False,
-          webdriver_remote=None, preferences = []):
+          webdriver_remote=None,
+          preferences = [],
+          capabilities = {} ):
     """
     Starts Browser with a new session. Called for you at
     the start of each test script."""
@@ -211,6 +213,9 @@ def start(browser_type=None, browser_version='',
                                 "version": browser_version,
                                 "javascriptEnabled": not javascript_disabled,
                                 "name": session_name }
+
+        for key in capabilities:
+            desired_capabilities[key] = capabilities[key]
 
         browser = webdriver.Remote(desired_capabilities=desired_capabilities,
                                    command_executor=webdriver_remote, 
